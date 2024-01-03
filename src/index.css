@@ -105,10 +105,12 @@ input:focus {
   align-self: center;
 }
 .years__cont {
-  background-color: hsl(259, 100%, 65%);
-  width: 30px;
-  height: 10px;
   color: hsl(259, 100%, 65%);
+  display: flex;
+
+  align-items: center;
+  font-weight: bolder;
+  align-self: center;
 }
 .container {
   display: flex;
@@ -199,8 +201,11 @@ h2 {
   }
 }
 
-
-@media screen and (max-width: 425px) {
-
-
+@media screen and (max-width: 375px) {
+  .background-container {
+    width: 89%;
+  }
+  .line {
+    width: 87%;
+  }
 }

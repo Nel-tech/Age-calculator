@@ -11,6 +11,33 @@ export default function App() {
 function Container({ children }) {
   return <div className="background-container">{children}</div>;
 }
+
+function calculateAge(birthDate) {
+  const today = new Date();
+  const dob = new Date(birthDate);
+
+  let years = today.getFullYear() - dob.getFullYear();
+  let months = today.getMonth() - dob.getMonth();
+  let days = today.getDate() - dob.getDate();
+
+  if (months < 0 || (months === 0 && today.getDate() < dob.getDate())) {
+    years--;
+    months = 12 - Math.abs(months);
+  }
+
+  if (days < 0) {
+    months--;
+    const previousMonth = new Date(
+      today.getFullYear(),
+      today.getMonth() - 1,
+      0
+    );
+    days = previousMonth.getDate() - Math.abs(days);
+  }
+
+  return { years, months, days };
+}
+
 function FormElement() {
   const [Day, setDay] = useState("");
   const [Year, setYear] = useState("");
@@ -18,6 +45,7 @@ function FormElement() {
   const [dayError, setDayError] = useState("");
   const [monthError, setMonthError] = useState("");
   const [yearError, setYearError] = useState("");
+  const [age, setAge] = useState(null);
 
   function validateDayInMonth(day, month, year) {
     if (month === 2) {
@@ -39,6 +67,11 @@ function FormElement() {
   function handleSubmit(e) {
     e.preventDefault();
     const currentYear = new Date().getFullYear();
+
+    if (!dayError && !monthError && !yearError) {
+      const ageResult = calculateAge(`${Year}-${Month}-${Day}`);
+      setAge(ageResult);
+    }
 
     if (Day === "") {
       setDayError("This field is required");
@@ -81,7 +114,7 @@ function FormElement() {
           yearError={yearError}
         />
         <LineButton onSubmit={handleSubmit} />
-        <ContainerContent Day={Day} Month={Month} Year={Year} />
+        <ContainerContent Day={Day} Month={Month} Year={Year} age={age} />
       </Container>
     </div>
   );
@@ -102,7 +135,11 @@ function Formbackground({
   return (
     <div className="flex-container">
       <form onSubmit={handleSubmit}>
-        <div className={`input-container ${dayError ? "error-border" : ""}`}>
+        <div
+          className={`input-container ${
+            dayError ? "error-border error-label" : ""
+          }`}
+        >
           <label className="label-el">DAY</label>
           <input
             type="number"
@@ -114,7 +151,11 @@ function Formbackground({
           <small className="error-el">{dayError}</small>
         </div>
 
-        <div className={`input-container ${monthError ? "error-border" : ""}`}>
+        <div
+          className={`input-container ${
+            monthError ? "error-border error-label" : ""
+          }`}
+        >
           <label className="label-el">MONTH</label>
           <input
             type="number"
@@ -126,13 +167,17 @@ function Formbackground({
           <small className="error-el">{monthError}</small>
         </div>
 
-        <div className={`input-container ${yearError ? "error-border" : ""}`}>
+        <div
+          className={`input-container ${
+            yearError ? "error-border error-label" : ""
+          }`}
+        >
           <label className="label-el">YEAR</label>
           <input
             type="number"
             value={Year}
             className="input-cont"
-            placeholder="YY"
+            placeholder="YYYY"
             onChange={(e) => setYear(e.target.value)}
           />
           <small className="error-el">{yearError}</small>
@@ -158,25 +203,42 @@ function LineButton({ onSubmit }) {
   );
 }
 
-function ContainerContent({ Day, Month, Year }) {
+function ContainerContent({ age }) {
+  const isAgeValid = age && Object.keys(age).every(key => age[key] >= 0);
+
   return (
     <div>
-      <div className="container">
-        <h1 className="years__cont">{Year}</h1>
-        <h1 className="years__cont">{Year}</h1>
-        <h2 className="years">years</h2>
-      </div>
-
-      <div className="container">
-        <h1 className="years__cont">{Month}</h1>
-        <h1 className="years__cont">{Month}</h1>
-        <h2 className="years">months</h2>
-      </div>
-      <div className="container">
-        <h1 className="years__cont">{Day}</h1>
-        <h1 className="years__cont">{Day}</h1>
-        <h2 className="years">days</h2>
-      </div>
+      {isAgeValid ? (
+        <div>
+          <div className="container">
+            <h1 className="years__cont">{age.days}</h1>
+            <h2 className="years">days</h2>
+          </div>
+          <div className="container">
+            <h1 className="years__cont">{age.months}</h1>
+            <h2 className="years">months</h2>
+          </div>
+          <div className="container">
+            <h1 className="years__cont">{age.years}</h1>
+            <h2 className="years">years</h2>
+          </div>
+        </div>
+      ) : (
+        <div>
+          <div className="container">
+            <h1 className="years__cont">_ _</h1>
+            <h2 className="years">days</h2>
+          </div>
+          <div className="container">
+            <h1 className="years__cont">_ _</h1>
+            <h2 className="years">months</h2>
+          </div>
+          <div className="container">
+            <h1 className="years__cont">_ _</h1>
+            <h2 className="years">years</h2>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
